@@ -41,7 +41,7 @@ All colors MUST be HSL.
     /* Custom tokens for PlumberPro */
     --hero-gradient-start: 215 85% 35%;
     --hero-gradient-end: 230 70% 45%;
-    --emergency-orange: 25 95% 55%;
+    --emergency-orange: 0 85% 50%;
     --success-green: 145 65% 45%;
     
     /* Shadows */
