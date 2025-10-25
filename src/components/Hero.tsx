@@ -50,6 +50,18 @@ const Hero = () => {
               variant="hero" 
               size="xl"
               className="bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20"
+              onClick={() => {
+                if (window.LeadConnector) {
+                  window.LeadConnector.openWidget();
+                  setTimeout(() => {
+                    const chatInput = document.querySelector('[data-testid="chat-input"], textarea, input[type="text"]') as HTMLInputElement | HTMLTextAreaElement;
+                    if (chatInput) {
+                      chatInput.value = "I'd like to request a free estimate for my plumbing needs.";
+                      chatInput.dispatchEvent(new Event('input', { bubbles: true }));
+                    }
+                  }, 500);
+                }
+              }}
             >
               <MessageSquare />
               Request Free Estimate

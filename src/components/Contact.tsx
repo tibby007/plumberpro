@@ -70,7 +70,22 @@ const Contact = () => {
               </p>
               
               <div className="space-y-4">
-                <Button size="lg" className="w-full">
+                <Button 
+                  size="lg" 
+                  className="w-full"
+                  onClick={() => {
+                    if (window.LeadConnector) {
+                      window.LeadConnector.openWidget();
+                      setTimeout(() => {
+                        const chatInput = document.querySelector('[data-testid="chat-input"], textarea, input[type="text"]') as HTMLInputElement | HTMLTextAreaElement;
+                        if (chatInput) {
+                          chatInput.value = "Hi, I need help with a plumbing issue.";
+                          chatInput.dispatchEvent(new Event('input', { bubbles: true }));
+                        }
+                      }, 500);
+                    }
+                  }}
+                >
                   Start Chat Now
                 </Button>
                 <Button variant="outline" size="lg" className="w-full" asChild>
