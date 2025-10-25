@@ -15,5 +15,8 @@ verify_jwt = false
 [functions.faq-agent]
 verify_jwt = false
 
+[functions.emergency-agent]
+verify_jwt = false
+
 [functions.test-webhook]
 verify_jwt = false
