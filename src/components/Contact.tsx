@@ -74,7 +74,8 @@ const Contact = () => {
                   size="lg" 
                   className="w-full"
                   onClick={() => {
-                    if (window.LeadConnector) {
+                    console.log('Button clicked, checking for LeadConnector...', window.LeadConnector);
+                    if (window.LeadConnector && typeof window.LeadConnector.openWidget === 'function') {
                       window.LeadConnector.openWidget();
                       setTimeout(() => {
                         const chatInput = document.querySelector('[data-testid="chat-input"], textarea, input[type="text"]') as HTMLInputElement | HTMLTextAreaElement;
@@ -83,6 +84,15 @@ const Contact = () => {
                           chatInput.dispatchEvent(new Event('input', { bubbles: true }));
                         }
                       }, 500);
+                    } else {
+                      console.error('LeadConnector widget not loaded yet');
+                      // Fallback: try to find and click the widget bubble directly
+                      const widgetBubble = document.querySelector('[data-testid="chat-bubble"], .chat-widget-bubble, iframe[title*="chat"]') as HTMLElement;
+                      if (widgetBubble) {
+                        widgetBubble.click();
+                      } else {
+                        alert('Chat widget is still loading. Please try again in a moment.');
+                      }
                     }
                   }}
                 >
