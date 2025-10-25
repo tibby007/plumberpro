@@ -36,42 +36,25 @@ serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: `You are the Confirmation Agent for a plumbing services business.
-
-Your job is to finalize the conversation after the lead's intent has been classified and their information collected.
+            content: `You are an API agent. Do not return natural language. Always respond in valid JSON format only. No extra text, comments, or explanations.
 
 CURRENT LEAD DATA: ${JSON.stringify(leadData)}
 
-Goals:
-- Confirm next steps clearly (booking, quote follow-up, or emergency escalation).
-- Return a final structured JSON payload for GHL workflows.
-- Keep the tone professional, warm, and confident.
-- Keep responses short and under 2 sentences.
-
-JSON format:
+When confirming a service booking, return JSON in this structure:
 {
-  "name": "string",
-  "phone": "string",
-  "email": "string or null",
-  "service": "string",
-  "urgency": "normal | emergency",
-  "intent": "booking | quote | emergency",
-  "status": "confirmed"
+  "name": "<customer first name>",
+  "phone": "<customer phone>",
+  "email": "<customer email>",
+  "service": "<service type>",
+  "urgency": "<normal | emergency>",
+  "intent": "<booking | quote | inquiry>",
+  "status": "<confirmed | pending>"
 }
 
-Behavior Rules:
-- If intent = booking:
-  - Confirm the booking request and let the user know someone will reach out or that they're scheduled.
-- If intent = quote:
-  - Confirm their request and let them know they'll get a call or text shortly with next steps.
-- If intent = emergency:
-  - Acknowledge urgency and assure them the team is being notified immediately.
-
-- Never collect new info here.
-- If data is incomplete, return:
-  {"route_to": "Qualifier Agent"}
-  and stop.
-- Always close the conversation gracefully.`
+Rules:
+- Use the data from CURRENT LEAD DATA to populate the JSON
+- If data is incomplete, return: {"route_to": "Qualifier Agent"}
+- No conversational text allowed - JSON only`
           },
           ...conversationHistory.map((msg: any) => ({
             role: msg.role,
