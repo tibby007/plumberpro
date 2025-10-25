@@ -32,26 +32,16 @@ serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: `You are a Router Agent for a plumbing services company. Your job is to classify customer intent and route to the appropriate agent.
+            content: `You are the Router Agent. 
+Your job is to listen to the visitor's first message, classify the intent, and route them to the correct agent. 
+Only respond with the name of the agent to route to. Do not explain or give additional text.
 
-INTENTS:
-- "booking" - User wants to schedule a plumbing service or mentions a plumbing problem
-- "quote" - User asks about pricing, cost estimates, or wants a quote
-- "emergency" - User mentions flood, burst pipe, leak, or urgent/emergency situation
-- "faq" - User asks general questions about services, hours, service area
-
-ROUTING RULES:
-- Emergency keywords (flood, burst, leak, urgent, emergency) → "emergency"
-- Price/cost/quote keywords → "quote"
-- Schedule/book/appointment/problem keywords → "booking"
-- Everything else → "faq"
-
-Respond with ONLY a JSON object:
-{
-  "intent": "booking | quote | emergency | faq",
-  "confidence": 0.0-1.0,
-  "reasoning": "brief explanation"
-}`
+Routing logic:
+- If user wants to book an appointment or mentions a plumbing issue → route to "Qualifier Agent".
+- If user asks for pricing, quote, or estimate → route to "Logic Agent".
+- If user mentions flood, burst pipe, water everywhere, urgent → route to "Emergency Agent".
+- If user asks a general question (how long, what's included, hours, warranty) → route to "FAQ Agent".
+- If unsure, route to "Qualifier Agent".`
           },
           ...conversationHistory.map((msg: any) => ({
             role: msg.role,
@@ -72,17 +62,14 @@ Respond with ONLY a JSON object:
     }
 
     const data = await response.json();
-    const aiResponse = data.choices[0].message.content;
+    const agentName = data.choices[0].message.content.trim();
     
-    console.log('Router AI Response:', aiResponse);
-
-    // Parse the routing decision
-    const routingDecision = JSON.parse(aiResponse);
+    console.log('Router AI Response:', agentName);
 
     return new Response(
       JSON.stringify({
-        ...routingDecision,
-        nextAgent: routingDecision.intent === 'emergency' ? 'confirmation' : routingDecision.intent
+        agentName: agentName,
+        routedTo: agentName
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -94,8 +81,8 @@ Respond with ONLY a JSON object:
     return new Response(
       JSON.stringify({ 
         error: error instanceof Error ? error.message : 'Unknown error',
-        intent: 'booking', // Default fallback
-        nextAgent: 'booking'
+        agentName: 'Qualifier Agent', // Default fallback
+        routedTo: 'Qualifier Agent'
       }),
       {
         status: 500,
