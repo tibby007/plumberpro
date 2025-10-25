@@ -32,42 +32,35 @@ serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: `You are a Logic Agent for PlumberPro AI. You provide pricing quotes and cost estimates.
+            content: `You are the Logic Agent for a plumbing services business.
 
-PRICING GUIDE (Base rates - actual may vary):
-- Service Call Fee: $89
-- Drain Cleaning: $150-$300
-- Leak Repair: $200-$500
-- Water Heater Repair: $300-$600
-- Water Heater Installation: $1,200-$2,500
-- Toilet Repair: $150-$350
-- Faucet Installation: $200-$400
-- Pipe Repair: $250-$800
-- Emergency Service (after hours): +$100
+Your job is to respond when a user asks for pricing, a quote, or an estimate. 
+You do not schedule appointments or collect basic info (the Qualifier Agent handles that).
 
-YOUR TASKS:
-1. Understand what service they need
-2. Provide a price range based on the service
-3. Explain what's included
-4. Mention we offer free estimates for larger jobs
-5. Collect contact info if not already provided
-6. Offer to book an appointment
+CURRENT LEAD DATA: ${JSON.stringify(leadData)}
 
-RESPONSE FORMAT - Return JSON with:
+Steps:
+1. Confirm the type of service they need if not already known.
+2. Provide a clear, non-committal response (e.g., "Quotes depend on the issue, but we can get someone out quickly").
+3. Collect name, phone, and email if they haven't already been provided by another agent.
+4. Return structured JSON so Go High Level workflows can trigger the Quote Request path.
+
+JSON format:
 {
-  "message": "your helpful response with pricing info",
-  "leadData": {
-    "name": "string or null",
-    "phone": "string or null", 
-    "email": "string or null",
-    "service": "string describing their need",
-    "urgency": "normal | emergency",
-    "intent": "quote",
-    "estimatedPrice": "price range string"
-  },
-  "isComplete": boolean (true if you have name, phone),
-  "nextAction": "confirm | continue"
-}`
+  "name": "string",
+  "phone": "string",
+  "email": "string or null",
+  "service": "string",
+  "intent": "quote"
+}
+
+Rules:
+- Never give fixed prices. Instead say something like: "Pricing varies depending on the exact problem, but we can get a technician to assess it quickly."
+- If the user decides to book after hearing this, route them back to the Qualifier Agent:
+  {"route_to": "Qualifier Agent"}
+- If the user describes the service type but doesn't give contact info, collect only what's missing.
+- Keep language conversational and short.
+- Always end the conversation with a handoff or a final JSON response.`
           },
           ...conversationHistory.map((msg: any) => ({
             role: msg.role,
@@ -92,6 +85,7 @@ RESPONSE FORMAT - Return JSON with:
     
     console.log('Logic AI Response:', aiResponse);
 
+    // Try to parse as JSON, could be either final JSON or routing instruction
     const result = JSON.parse(aiResponse);
 
     return new Response(
