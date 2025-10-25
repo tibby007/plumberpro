@@ -99,6 +99,24 @@ Behavior Rules:
     // Try to parse as JSON, could be either final JSON or routing instruction
     const result = JSON.parse(aiResponse);
 
+    // Send the final response to GHL webhook
+    const webhookUrl = 'https://services.leadconnectorhq.com/hooks/nCgaDadjDRyzUo1fd29V/webhook-trigger/d3e03b84-e55a-4e88-9f53-d2b76b2d43f4';
+    
+    try {
+      const webhookResponse = await fetch(webhookUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(result),
+      });
+      
+      console.log('GHL Webhook sent:', webhookResponse.status, await webhookResponse.text());
+    } catch (webhookError) {
+      console.error('GHL Webhook failed:', webhookError);
+      // Continue even if webhook fails - don't break the user flow
+    }
+
     return new Response(
       JSON.stringify(result),
       {
