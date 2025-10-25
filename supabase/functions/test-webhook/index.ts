@@ -21,7 +21,7 @@ serve(async (req) => {
       "status": "confirmed"
     };
 
-    const webhookUrl = 'https://services.leadconnectorhq.com/hooks/nCgaDadjDRyzUo1fd29V/webhook-trigger/d3e03b84-e55a-4e88-9f53-d2b76b2d43f4';
+    const webhookUrl = 'https://services.leadconnectorhq.com/hooks/nCgaDadjDRyzUo1fd29V/webhook-trigger/0cbcc274-1500-49af-a4a2-93f4f543e005';
     
     console.log('Sending test webhook to GHL...', testPayload);
     
