@@ -73,9 +73,11 @@ const Contact = () => {
                 <Button size="lg" className="w-full">
                   Start Chat Now
                 </Button>
-                <Button variant="outline" size="lg" className="w-full">
-                  <Phone />
-                  Call for Emergency
+                <Button variant="outline" size="lg" className="w-full" asChild>
+                  <a href="tel:+14707123113">
+                    <Phone />
+                    Call for Emergency
+                  </a>
                 </Button>
               </div>
 

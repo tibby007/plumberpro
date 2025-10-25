@@ -39,9 +39,12 @@ const Hero = () => {
               variant="emergency" 
               size="xl"
               className="group"
+              asChild
             >
-              <Phone className="transition-transform group-hover:rotate-12" />
-              Book Emergency Service
+              <a href="tel:+14707123113">
+                <Phone className="transition-transform group-hover:rotate-12" />
+                Book Emergency Service
+              </a>
             </Button>
             <Button 
               variant="hero" 
