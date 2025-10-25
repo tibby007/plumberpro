@@ -1,1 +1,16 @@
 project_id = "hsyfxdatqezdzwsundxk"
+
+[functions.router-agent]
+verify_jwt = false
+
+[functions.qualifier-agent]
+verify_jwt = false
+
+[functions.logic-agent]
+verify_jwt = false
+
+[functions.confirmation-agent]
+verify_jwt = false
+
+[functions.faq-agent]
+verify_jwt = false
