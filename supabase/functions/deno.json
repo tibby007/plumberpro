@@ -1,0 +1,11 @@
+{
+  "imports": {
+    "@supabase/supabase-js": "jsr:@supabase/supabase-js@2"
+  },
+  "tasks": {
+    "serve": "deno run --allow-all --unstable-sloppy-imports --watch --no-check=remote"
+  },
+  "compilerOptions": {
+    "lib": ["deno.ns", "esnext"]
+  }
+}
