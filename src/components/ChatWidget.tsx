@@ -9,7 +9,11 @@ import { sendMessageToN8N } from '@/lib/api';
 import type { Message, ContactInfo } from '@/types';
 import { formatDistanceToNow } from 'date-fns';
 
-export function ChatWidget() {
+interface ChatWidgetProps {
+  embedded?: boolean;
+}
+
+export function ChatWidget({ embedded = false }: ChatWidgetProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [contactInfo, setContactInfo] = useState<ContactInfo | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -83,43 +87,35 @@ export function ChatWidget() {
     }
   };
 
-  return (
-    <>
-      {/* Floating chat button */}
-      <Button
-        onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-4 md:bottom-6 right-4 md:right-6 h-12 w-12 md:h-14 md:w-14 rounded-full shadow-lg z-50 animate-fade-in"
-        size="icon"
-      >
-        {isOpen ? <X className="h-5 w-5 md:h-6 md:w-6" /> : <MessageCircle className="h-5 w-5 md:h-6 md:w-6" />}
-      </Button>
-
-      {/* Chat window */}
-      {isOpen && (
-        <div className="fixed bottom-20 md:bottom-24 right-4 md:right-6 w-[calc(100vw-2rem)] sm:w-96 h-[500px] max-h-[80vh] bg-background border rounded-lg shadow-xl flex flex-col z-50 animate-scale-in">
-          <div className="p-4 border-b bg-primary text-primary-foreground rounded-t-lg">
-            <h3 className="font-semibold text-base md:text-lg">PlumberPro AI Assistant</h3>
-            <p className="text-xs opacity-90">We typically reply instantly</p>
-          </div>
-          
-          <div className="flex-1 overflow-hidden">
-            {!contactInfo ? (
-              <ContactForm onSubmit={handleContactSubmit} />
-            ) : (
-              <ChatMessages
-                messages={messages}
-                input={input}
-                setInput={setInput}
-                sendMessage={sendMessage}
-                isLoading={isLoading}
-                handleKeyPress={handleKeyPress}
-              />
-            )}
-          </div>
+  // Embedded mode - always visible, centered widget
+  if (embedded) {
+    return (
+      <div className="w-full max-w-2xl mx-auto bg-background/95 backdrop-blur-sm border-2 border-white/20 rounded-lg shadow-2xl flex flex-col animate-scale-in">
+        <div className="p-6 border-b bg-primary text-primary-foreground rounded-t-lg">
+          <h3 className="font-semibold text-xl">💬 PlumberPro AI Assistant</h3>
+          <p className="text-sm opacity-90">Get instant help with your plumbing needs</p>
         </div>
-      )}
-    </>
-  );
+        
+        <div className="flex-1 overflow-hidden min-h-[500px] max-h-[600px]">
+          {!contactInfo ? (
+            <ContactForm onSubmit={handleContactSubmit} />
+          ) : (
+            <ChatMessages
+              messages={messages}
+              input={input}
+              setInput={setInput}
+              sendMessage={sendMessage}
+              isLoading={isLoading}
+              handleKeyPress={handleKeyPress}
+            />
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // Floating mode - legacy (not used in new design)
+  return null;
 }
 
 interface ContactFormProps {

@@ -1,10 +1,31 @@
 import { Button } from "@/components/ui/button";
-import { Phone, MessageSquare } from "lucide-react";
+import { Phone } from "lucide-react";
 import heroImage from "@/assets/hero-plumber.jpg";
+import { ChatWidget } from "@/components/ChatWidget";
 
 const Hero = () => {
+  const scrollToChat = () => {
+    const chatSection = document.getElementById('chat-section');
+    if (chatSection) {
+      chatSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  };
+
   return (
-    <section className="relative min-h-[90vh] flex items-center overflow-hidden">
+    <section className="relative min-h-screen flex items-center overflow-hidden">
+      {/* Emergency button - top right */}
+      <div className="absolute top-4 right-4 z-20">
+        <Button
+          asChild
+          className="bg-[hsl(0,85%,50%)] hover:bg-[hsl(0,85%,45%)] text-white font-bold shadow-lg animate-emergency-pulse"
+          size="lg"
+        >
+          <a href="tel:+14707123113" className="flex items-center gap-2">
+            🚨 Emergency? Call Now
+          </a>
+        </Button>
+      </div>
+
       {/* Background with gradient overlay */}
       <div className="absolute inset-0 z-0">
         <img
@@ -16,60 +37,47 @@ const Hero = () => {
       </div>
 
       {/* Content */}
-      <div className="container mx-auto px-4 relative z-10">
-        <div className="max-w-3xl">
-          <div className="inline-block mb-4 px-4 py-2 bg-accent/20 border border-accent/30 rounded-full">
-            <p className="text-sm font-semibold text-white flex items-center gap-2">
-              <span className="inline-block w-2 h-2 bg-accent rounded-full animate-pulse" />
-              Available 24/7 for Emergencies
+      <div className="container mx-auto px-4 py-20 relative z-10">
+        <div className="max-w-6xl mx-auto">
+          {/* Header section */}
+          <div className="text-center mb-12">
+            <div className="inline-block mb-4 px-4 py-2 bg-accent/20 border border-accent/30 rounded-full">
+              <p className="text-sm font-semibold text-white flex items-center gap-2">
+                <span className="inline-block w-2 h-2 bg-accent rounded-full animate-pulse" />
+                Available 24/7 for Emergencies
+              </p>
+            </div>
+            
+            <h1 className="text-white mb-6 leading-tight">
+              Fast, Reliable Plumbing
+              <span className="block text-accent">When You Need It Most</span>
+            </h1>
+            
+            <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto leading-relaxed">
+              Professional plumbing services with instant booking. Emergency repairs, maintenance, and installations by certified experts.
             </p>
           </div>
-          
-          <h1 className="text-white mb-6 leading-tight">
-            Fast, Reliable Plumbing
-            <span className="block text-accent">When You Need It Most</span>
-          </h1>
-          
-          <p className="text-xl text-white/90 mb-8 max-w-2xl leading-relaxed">
-            Professional plumbing services with instant booking. Emergency repairs, maintenance, and installations by certified experts.
-          </p>
 
-          <div className="flex flex-col sm:flex-row gap-4">
-            <Button 
-              variant="emergency" 
-              size="xl"
-              className="group"
-              asChild
-            >
-              <a href="tel:+14707123113">
-                <Phone className="transition-transform group-hover:rotate-12" />
-                Book Emergency Service
-              </a>
-            </Button>
+          {/* Embedded Chat Widget - MAIN CTA */}
+          <div id="chat-section" className="max-w-2xl mx-auto mb-8">
+            <ChatWidget embedded={true} />
+          </div>
+
+          {/* Secondary CTA */}
+          <div className="text-center mb-12">
             <Button 
               variant="hero" 
               size="xl"
               className="bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20"
-              onClick={() => {
-                if (window.LeadConnector) {
-                  window.LeadConnector.openWidget();
-                  setTimeout(() => {
-                    const chatInput = document.querySelector('[data-testid="chat-input"], textarea, input[type="text"]') as HTMLInputElement | HTMLTextAreaElement;
-                    if (chatInput) {
-                      chatInput.value = "I'd like to request a free estimate for my plumbing needs.";
-                      chatInput.dispatchEvent(new Event('input', { bubbles: true }));
-                    }
-                  }, 500);
-                }
-              }}
+              onClick={scrollToChat}
             >
-              <MessageSquare />
+              <Phone className="mr-2" />
               Request Free Estimate
             </Button>
           </div>
 
           {/* Trust indicators */}
-          <div className="mt-12 flex flex-wrap gap-8 text-white/80 text-sm">
+          <div className="flex flex-wrap justify-center gap-8 text-white/80 text-sm">
             <div className="flex items-center gap-2">
               <div className="w-5 h-5 bg-[hsl(var(--success-green))] rounded-full flex items-center justify-center">
                 <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
