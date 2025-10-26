@@ -1,17 +1,49 @@
 import { useState, useEffect } from 'react';
 import { KanbanBoard } from '@/components/dashboard/KanbanBoard';
 import { ConversationPanel } from '@/components/dashboard/ConversationPanel';
+import { DashboardSkeleton } from '@/components/dashboard/Skeletons';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
 import type { Lead, Message } from '@/types';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Wifi, WifiOff } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const Dashboard = () => {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
   const { toast } = useToast();
+
+  // Monitor online/offline status
+  useEffect(() => {
+    const handleOnline = () => {
+      setIsOnline(true);
+      toast({
+        title: 'Back Online',
+        description: 'Connection restored.',
+      });
+      fetchLeads(); // Refresh data when back online
+    };
+
+    const handleOffline = () => {
+      setIsOnline(false);
+      toast({
+        title: 'Offline',
+        description: 'You are currently offline.',
+        variant: 'destructive',
+      });
+    };
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   // Fetch leads on mount
   useEffect(() => {
@@ -128,21 +160,47 @@ const Dashboard = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="min-h-screen bg-background p-6">
+        <div className="max-w-7xl mx-auto">
+          <header className="mb-8">
+            <h1 className="text-3xl font-bold">PlumberPro Dashboard</h1>
+            <p className="text-muted-foreground mt-2">Loading your leads...</p>
+          </header>
+          <DashboardSkeleton />
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background p-6">
+    <div className="min-h-screen bg-background p-4 md:p-6">
       <div className="max-w-7xl mx-auto">
-        <header className="mb-8">
-          <h1 className="text-3xl font-bold">PlumberPro Dashboard</h1>
-          <p className="text-muted-foreground mt-2">
-            Manage your leads and conversations
-          </p>
+        <header className="mb-6 md:mb-8">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl md:text-3xl font-bold">PlumberPro Dashboard</h1>
+              <p className="text-muted-foreground mt-2 text-sm md:text-base">
+                Manage your leads and conversations
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              {isOnline ? (
+                <Wifi className="h-5 w-5 text-success-green" />
+              ) : (
+                <WifiOff className="h-5 w-5 text-destructive" />
+              )}
+            </div>
+          </div>
         </header>
+
+        {!isOnline && (
+          <Alert className="mb-6">
+            <WifiOff className="h-4 w-4" />
+            <AlertDescription>
+              You're currently offline. Some features may be unavailable.
+            </AlertDescription>
+          </Alert>
+        )}
 
         <div className="relative">
           <KanbanBoard 

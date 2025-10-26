@@ -86,17 +86,17 @@ export function ChatWidget() {
       {/* Floating chat button */}
       <Button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg z-50 animate-fade-in"
+        className="fixed bottom-4 md:bottom-6 right-4 md:right-6 h-12 w-12 md:h-14 md:w-14 rounded-full shadow-lg z-50 animate-fade-in"
         size="icon"
       >
-        {isOpen ? <X className="h-6 w-6" /> : <MessageCircle className="h-6 w-6" />}
+        {isOpen ? <X className="h-5 w-5 md:h-6 md:w-6" /> : <MessageCircle className="h-5 w-5 md:h-6 md:w-6" />}
       </Button>
 
       {/* Chat window */}
       {isOpen && (
-        <div className="fixed bottom-24 right-6 w-96 h-[500px] bg-background border rounded-lg shadow-xl flex flex-col z-50 animate-scale-in">
+        <div className="fixed bottom-20 md:bottom-24 right-4 md:right-6 w-[calc(100vw-2rem)] sm:w-96 h-[500px] max-h-[80vh] bg-background border rounded-lg shadow-xl flex flex-col z-50 animate-scale-in">
           <div className="p-4 border-b bg-primary text-primary-foreground rounded-t-lg">
-            <h3 className="font-semibold">PlumberPro AI Assistant</h3>
+            <h3 className="font-semibold text-base md:text-lg">PlumberPro AI Assistant</h3>
             <p className="text-xs opacity-90">We typically reply instantly</p>
           </div>
           
