@@ -57,11 +57,11 @@ export function ChatWidget() {
       );
 
       const aiMessage: Message = {
-        id: crypto.randomUUID(),
+        id: response.id || crypto.randomUUID(),
         conversation_id: conversationId,
-        message: response.reply,
+        message: response.message || response.reply,
         sender: 'ai',
-        timestamp: new Date(),
+        timestamp: response.timestamp ? new Date(response.timestamp) : new Date(),
       };
 
       setMessages((prev) => [...prev, aiMessage]);

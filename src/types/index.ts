@@ -28,8 +28,12 @@ export interface ContactInfo {
 }
 
 export interface ApiResponse {
-  reply: string;
-  intent: string;
+  id?: string;
+  reply?: string;
+  message?: string;
+  intent?: string;
   conversation_id: string;
+  sender?: string;
+  timestamp?: string;
   status?: string;
 }
