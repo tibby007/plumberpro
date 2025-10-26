@@ -1,4 +1,4 @@
-import { X, Phone, Mail, Calendar, AlertCircle } from 'lucide-react';
+import { X, Phone, Mail, Calendar, AlertCircle, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
@@ -10,10 +10,28 @@ interface ConversationPanelProps {
   lead: Lead | null;
   messages: Message[];
   onClose: () => void;
+  onDelete: (leadId: string) => void;
+  onComplete: (leadId: string) => void;
+  onFollowUp: (lead: Lead) => void;
 }
 
-export function ConversationPanel({ lead, messages, onClose }: ConversationPanelProps) {
+export function ConversationPanel({ lead, messages, onClose, onDelete, onComplete, onFollowUp }: ConversationPanelProps) {
   if (!lead) return null;
+
+  const handleDelete = () => {
+    if (confirm(`Are you sure you want to delete this lead from ${lead.customer_name}?`)) {
+      onDelete(lead.id);
+      onClose();
+    }
+  };
+
+  const handleComplete = () => {
+    onComplete(lead.id);
+  };
+
+  const handleFollowUp = () => {
+    onFollowUp(lead);
+  };
 
   return (
     <>
@@ -101,15 +119,31 @@ export function ConversationPanel({ lead, messages, onClose }: ConversationPanel
         </div>
 
         {/* Footer Actions */}
-        <div className="p-4 border-t bg-background">
+        <div className="p-4 border-t bg-background space-y-2">
           <div className="flex gap-2">
-            <Button className="flex-1" variant="outline">
-              Mark as Complete
+            <Button 
+              className="flex-1" 
+              variant="outline"
+              onClick={handleComplete}
+              disabled={lead.status === 'completed'}
+            >
+              {lead.status === 'completed' ? 'Completed' : 'Mark as Complete'}
             </Button>
-            <Button className="flex-1">
+            <Button 
+              className="flex-1"
+              onClick={handleFollowUp}
+            >
               Send Follow-up
             </Button>
           </div>
+          <Button 
+            className="w-full" 
+            variant="destructive"
+            onClick={handleDelete}
+          >
+            <Trash2 className="h-4 w-4 mr-2" />
+            Delete Lead
+          </Button>
         </div>
       </div>
     </>

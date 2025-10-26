@@ -235,6 +235,65 @@ const Dashboard = () => {
     }
   };
 
+  const handleDeleteLead = async (leadId: string) => {
+    try {
+      const { error } = await supabase
+        .from('leads')
+        .delete()
+        .eq('id', leadId);
+
+      if (error) throw error;
+
+      toast({
+        title: 'Lead Deleted',
+        description: 'Lead has been permanently deleted.',
+      });
+    } catch (error) {
+      console.error('Error deleting lead:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to delete lead.',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleCompleteLead = async (leadId: string) => {
+    try {
+      const { error } = await supabase
+        .from('leads')
+        .update({ status: 'completed', updated_at: new Date().toISOString() })
+        .eq('id', leadId);
+
+      if (error) throw error;
+
+      toast({
+        title: 'Lead Completed',
+        description: 'Lead marked as complete.',
+      });
+      setSelectedLead(null);
+    } catch (error) {
+      console.error('Error completing lead:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to complete lead.',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleFollowUp = (lead: Lead) => {
+    // Open email client with pre-filled template
+    const subject = encodeURIComponent(`Follow-up: ${lead.intent}`);
+    const body = encodeURIComponent(
+      `Hi ${lead.customer_name},\n\nThank you for contacting PlumberPro AI. ` +
+      `I wanted to follow up regarding your ${lead.intent} inquiry.\n\n` +
+      `Please let me know if you have any questions or would like to schedule a service.\n\n` +
+      `Best regards,\nPlumberPro Team`
+    );
+    window.location.href = `mailto:${lead.email}?subject=${subject}&body=${body}`;
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background p-6">
@@ -298,6 +357,9 @@ const Dashboard = () => {
             lead={selectedLead}
             messages={messages}
             onClose={() => setSelectedLead(null)}
+            onDelete={handleDeleteLead}
+            onComplete={handleCompleteLead}
+            onFollowUp={handleFollowUp}
           />
         </div>
       </div>
