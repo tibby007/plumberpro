@@ -3,15 +3,19 @@ import { useNavigate } from 'react-router-dom';
 import { KanbanBoard } from '@/components/dashboard/KanbanBoard';
 import { ConversationPanel } from '@/components/dashboard/ConversationPanel';
 import { DashboardSkeleton } from '@/components/dashboard/Skeletons';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import type { Lead, Message } from '@/types';
+import { Session, User } from '@supabase/supabase-js';
 import { Loader2, Wifi, WifiOff, LogOut } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const [session, setSession] = useState<Session | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [isPlumber, setIsPlumber] = useState(false);
   const [leads, setLeads] = useState<Lead[]>([]);
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -19,29 +23,67 @@ const Dashboard = () => {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const { toast } = useToast();
 
-  // Check authentication and session timeout
+  // Check authentication and role
   useEffect(() => {
-    const isAuth = localStorage.getItem('isAuthenticated');
-    const authTimestamp = localStorage.getItem('authTimestamp');
-    
-    if (isAuth !== 'true') {
-      navigate('/login');
-      return;
-    }
-
-    // Optional: Check for 24-hour session timeout
-    if (authTimestamp) {
-      const hoursSinceAuth = (Date.now() - parseInt(authTimestamp)) / (1000 * 60 * 60);
-      if (hoursSinceAuth > 24) {
-        handleLogout();
-        return;
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        if (session?.user) {
+          // Check plumber role using setTimeout to avoid deadlock
+          setTimeout(() => {
+            checkPlumberRole(session.user.id);
+          }, 0);
+        } else {
+          navigate('/login');
+        }
       }
-    }
+    );
+
+    // Check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      
+      if (session?.user) {
+        checkPlumberRole(session.user.id);
+      } else {
+        navigate('/login');
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, [navigate]);
 
-  const handleLogout = () => {
-    localStorage.removeItem('isAuthenticated');
-    localStorage.removeItem('authTimestamp');
+  const checkPlumberRole = async (userId: string) => {
+    try {
+      const { data: roles } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', userId)
+        .eq('role', 'plumber');
+      
+      if (!roles || roles.length === 0) {
+        toast({
+          title: 'Access Denied',
+          description: 'You need plumber privileges to access this dashboard.',
+          variant: 'destructive',
+        });
+        await supabase.auth.signOut();
+        navigate('/login');
+      } else {
+        setIsPlumber(true);
+      }
+    } catch (error) {
+      console.error('Error checking role:', error);
+      navigate('/login');
+    }
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
     toast({
       title: 'Logged out',
       description: 'You have been successfully logged out.',
@@ -78,11 +120,13 @@ const Dashboard = () => {
     };
   }, []);
 
-  // Fetch leads on mount
+  // Fetch leads on mount (only if authenticated as plumber)
   useEffect(() => {
-    fetchLeads();
-    setupRealtimeSubscription();
-  }, []);
+    if (isPlumber) {
+      fetchLeads();
+      setupRealtimeSubscription();
+    }
+  }, [isPlumber]);
 
   const fetchLeads = async () => {
     try {
