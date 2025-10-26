@@ -11,97 +11,79 @@ serve(async (req) => {
   }
 
   try {
-    const payload = await req.json();
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+    const body = await req.json();
+    let message = body.message;
 
-    if (!LOVABLE_API_KEY) {
-      throw new Error('LOVABLE_API_KEY not configured');
+    // Normalize message input
+    if (typeof message === "object" && message !== null) {
+      message = message.text || message.body || JSON.stringify(message);
+    }
+    if (typeof message !== "string") {
+      message = String(message || "");
+    }
+    message = message.trim();
+
+    const conversationId = body.conversation_id || body.conversationId || null;
+    const contact = body.contact || {};
+    const name = contact.name || "";
+    const phone = contact.phone || "";
+    const email = contact.email || "";
+
+    console.log('Router Agent received:', { message, conversationId, contact });
+
+    // Simple intent classification
+    let intent = "general_inquiry";
+    const lowerMsg = message.toLowerCase();
+
+    if (lowerMsg.includes("quote") || lowerMsg.includes("estimate") || lowerMsg.includes("price") || lowerMsg.includes("cost")) {
+      intent = "quote_request";
+    } else if (
+      lowerMsg.includes("emergency") ||
+      lowerMsg.includes("leak") ||
+      lowerMsg.includes("burst") ||
+      lowerMsg.includes("flood") ||
+      lowerMsg.includes("urgent")
+    ) {
+      intent = "emergency";
+    } else if (
+      lowerMsg.includes("book") ||
+      lowerMsg.includes("appointment") ||
+      lowerMsg.includes("schedule")
+    ) {
+      intent = "booking";
     }
 
-    // Parse GHL webhook payload
-    const message = payload.message || '';
-    const contact = payload.contact || {};
-    const conversationId = payload.conversation_id || '';
-    
-    console.log('Router Agent received:', { message, contact, conversationId });
-
-    // Validate required fields
-    if (!message || message.trim() === '') {
-      return new Response(
-        JSON.stringify({ status: 'error', message: 'invalid input' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    // Call Lovable AI to classify intent
-    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
-        messages: [
-          {
-            role: 'system',
-            content: `Classify this message into ONE of these intents. Respond with ONLY the intent name:
-- "quote_request" for pricing, estimates, or quote requests
-- "emergency" for urgent issues like floods, burst pipes, water everywhere
-- "booking" for appointment scheduling or service requests
-- "general_inquiry" for questions about services, hours, warranty, etc.`
-          },
-          {
-            role: 'user',
-            content: message
-          }
-        ],
-      }),
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('AI Gateway error:', response.status, errorText);
-      throw new Error(`AI Gateway failed: ${response.status}`);
-    }
-
-    const data = await response.json();
-    const intent = data.choices[0].message.content.trim().toLowerCase();
-    
     console.log('Classified intent:', intent);
 
-    // Generate confirmation reply based on intent
-    const replies: Record<string, string> = {
-      quote_request: "Thanks, I've noted your request for a quote. A team member will follow up shortly.",
-      emergency: "Emergency request received. A plumber will contact you right away.",
-      booking: "Got it. We'll get your appointment set up.",
-      general_inquiry: "Thanks for reaching out! How can we help you today?"
+    // Response object for GHL
+    const responsePayload = {
+      status: "success",
+      intent,
+      message,
+      conversation_id: conversationId,
+      contact: {
+        name,
+        phone,
+        email,
+      },
+      reply:
+        intent === "emergency"
+          ? "Emergency request received. A plumber will contact you right away."
+          : intent === "quote_request"
+          ? "Thanks, I've noted your request for a quote. A team member will follow up shortly."
+          : intent === "booking"
+          ? "Got it. We'll get your appointment set up."
+          : "Thanks for reaching out! How can we help you today?",
     };
 
-    const reply = replies[intent] || replies.general_inquiry;
-
-    return new Response(
-      JSON.stringify({
-        status: 'success',
-        intent: intent,
-        reply: reply
-      }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      }
-    );
-
+    return new Response(JSON.stringify(responsePayload), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   } catch (error) {
-    console.error('Router Agent error:', error);
+    console.error("Router Agent error:", error);
     return new Response(
-      JSON.stringify({ 
-        status: 'error',
-        message: error instanceof Error ? error.message : 'Unknown error'
-      }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      }
+      JSON.stringify({ status: "error", message: error instanceof Error ? error.message : "Unknown error" }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
 });
