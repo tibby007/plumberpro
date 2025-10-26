@@ -1,61 +1,53 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
-
 serve(async (req) => {
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
-  }
-
   try {
     const body = await req.json();
-    let message = body.message;
 
-    // Normalize message input
-    if (typeof message === "object" && message !== null) {
-      message = message.text || message.body || JSON.stringify(message);
-    }
-    if (typeof message !== "string") {
-      message = String(message || "");
-    }
-    message = message.trim();
+    // Log the raw incoming message for debugging
+    console.log("Incoming payload:", JSON.stringify(body));
 
-    const conversationId = body.conversation_id || body.conversationId || null;
+    let rawMessage = body.message;
+
+    // Handle various shapes of incoming message
+    if (rawMessage === null || rawMessage === undefined) {
+      rawMessage = "";
+    } else if (typeof rawMessage === "object") {
+      // if it's an object, try to extract text or stringify
+      rawMessage = rawMessage.text || JSON.stringify(rawMessage);
+    } else if (Array.isArray(rawMessage)) {
+      rawMessage = rawMessage.join(" ");
+    } else if (typeof rawMessage !== "string") {
+      rawMessage = String(rawMessage);
+    }
+
+    const message = rawMessage.trim();
+
+    const conversationId = body.conversation_id || body.conversationId || "";
     const contact = body.contact || {};
     const name = contact.name || "";
     const phone = contact.phone || "";
     const email = contact.email || "";
 
-    console.log('Router Agent received:', { message, conversationId, contact });
-
-    // Simple intent classification
-    let intent = "general_inquiry";
+    // Intent classification
     const lowerMsg = message.toLowerCase();
+    let intent = "general";
 
-    if (lowerMsg.includes("quote") || lowerMsg.includes("estimate") || lowerMsg.includes("price") || lowerMsg.includes("cost")) {
-      intent = "quote_request";
+    if (lowerMsg.includes("quote") || lowerMsg.includes("estimate")) {
+      intent = "quote";
     } else if (
       lowerMsg.includes("emergency") ||
       lowerMsg.includes("leak") ||
-      lowerMsg.includes("burst") ||
-      lowerMsg.includes("flood") ||
-      lowerMsg.includes("urgent")
+      lowerMsg.includes("burst")
     ) {
       intent = "emergency";
     } else if (
       lowerMsg.includes("book") ||
-      lowerMsg.includes("appointment") ||
-      lowerMsg.includes("schedule")
+      lowerMsg.includes("appointment")
     ) {
       intent = "booking";
     }
 
-    console.log('Classified intent:', intent);
-
-    // Response object for GHL
     const responsePayload = {
       status: "success",
       intent,
@@ -69,21 +61,21 @@ serve(async (req) => {
       reply:
         intent === "emergency"
           ? "Emergency request received. A plumber will contact you right away."
-          : intent === "quote_request"
-          ? "Thanks, I've noted your request for a quote. A team member will follow up shortly."
+          : intent === "quote"
+          ? "Got it. I can help with that quote. Let's get your details."
           : intent === "booking"
-          ? "Got it. We'll get your appointment set up."
-          : "Thanks for reaching out! How can we help you today?",
+          ? "Let's book your appointment. Please provide your availability."
+          : "Thanks for reaching out. How can we help you today?",
     };
 
     return new Response(JSON.stringify(responsePayload), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json" },
     });
   } catch (error) {
     console.error("Router Agent error:", error);
     return new Response(
       JSON.stringify({ status: "error", message: error instanceof Error ? error.message : "Unknown error" }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      { status: 500, headers: { "Content-Type": "application/json" } }
     );
   }
 });
