@@ -12,20 +12,7 @@ const Hero = () => {
   };
 
   return (
-    <section className="relative min-h-screen flex items-center overflow-hidden">
-      {/* Emergency button - top right */}
-      <div className="absolute top-4 right-4 z-20">
-        <Button
-          asChild
-          className="bg-[hsl(0,85%,50%)] hover:bg-[hsl(0,85%,45%)] text-white font-bold shadow-lg animate-emergency-pulse"
-          size="lg"
-        >
-          <a href="tel:+14707123113" className="flex items-center gap-2">
-            🚨 Emergency? Call Now
-          </a>
-        </Button>
-      </div>
-
+    <section className="relative min-h-screen flex items-center overflow-hidden pt-20">
       {/* Background with gradient overlay */}
       <div className="absolute inset-0 z-0">
         <img
