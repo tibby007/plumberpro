@@ -1,7 +1,7 @@
 import type { ContactInfo, ApiResponse } from '@/types';
 
-// Placeholder webhook URL - replace with actual n8n webhook
-const N8N_WEBHOOK_URL = 'https://placeholder-n8n-webhook.com/webhook';
+// n8n webhook endpoint
+const N8N_WEBHOOK_URL = 'https://n8n.srv998244.hstgr.cloud/webhook/plumberpro-chat';
 
 interface RetryOptions {
   maxRetries?: number;
