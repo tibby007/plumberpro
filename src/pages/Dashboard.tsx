@@ -1,20 +1,53 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { KanbanBoard } from '@/components/dashboard/KanbanBoard';
 import { ConversationPanel } from '@/components/dashboard/ConversationPanel';
 import { DashboardSkeleton } from '@/components/dashboard/Skeletons';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
 import type { Lead, Message } from '@/types';
-import { Loader2, Wifi, WifiOff } from 'lucide-react';
+import { Loader2, Wifi, WifiOff, LogOut } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
 
 const Dashboard = () => {
+  const navigate = useNavigate();
   const [leads, setLeads] = useState<Lead[]>([]);
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const { toast } = useToast();
+
+  // Check authentication and session timeout
+  useEffect(() => {
+    const isAuth = localStorage.getItem('isAuthenticated');
+    const authTimestamp = localStorage.getItem('authTimestamp');
+    
+    if (isAuth !== 'true') {
+      navigate('/login');
+      return;
+    }
+
+    // Optional: Check for 24-hour session timeout
+    if (authTimestamp) {
+      const hoursSinceAuth = (Date.now() - parseInt(authTimestamp)) / (1000 * 60 * 60);
+      if (hoursSinceAuth > 24) {
+        handleLogout();
+        return;
+      }
+    }
+  }, [navigate]);
+
+  const handleLogout = () => {
+    localStorage.removeItem('isAuthenticated');
+    localStorage.removeItem('authTimestamp');
+    toast({
+      title: 'Logged out',
+      description: 'You have been successfully logged out.',
+    });
+    navigate('/login');
+  };
 
   // Monitor online/offline status
   useEffect(() => {
@@ -176,19 +209,28 @@ const Dashboard = () => {
     <div className="min-h-screen bg-background p-4 md:p-6">
       <div className="max-w-7xl mx-auto">
         <header className="mb-6 md:mb-8">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap gap-4">
             <div>
               <h1 className="text-2xl md:text-3xl font-bold">PlumberPro Dashboard</h1>
               <p className="text-muted-foreground mt-2 text-sm md:text-base">
                 Manage your leads and conversations
               </p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               {isOnline ? (
-                <Wifi className="h-5 w-5 text-success-green" />
+                <Wifi className="h-5 w-5 text-green-600" />
               ) : (
                 <WifiOff className="h-5 w-5 text-destructive" />
               )}
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={handleLogout}
+                className="gap-2"
+              >
+                <LogOut className="h-4 w-4" />
+                Logout
+              </Button>
             </div>
           </div>
         </header>
