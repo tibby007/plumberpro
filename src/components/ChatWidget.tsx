@@ -20,12 +20,14 @@ export function ChatWidget() {
 
   const handleContactSubmit = async (info: ContactInfo) => {
     setContactInfo(info);
-    setConversationId(crypto.randomUUID());
+    const newConversationId = crypto.randomUUID();
+    setConversationId(newConversationId);
     
     // Add welcome message
     const welcomeMessage: Message = {
       id: crypto.randomUUID(),
-      text: "Hi! I'm here to help with your plumbing needs. How can I assist you today?",
+      conversation_id: newConversationId,
+      message: "Hi! I'm here to help with your plumbing needs. How can I assist you today?",
       sender: 'ai',
       timestamp: new Date(),
     };
@@ -37,10 +39,10 @@ export function ChatWidget() {
 
     const userMessage: Message = {
       id: crypto.randomUUID(),
-      text: input.trim(),
+      conversation_id: conversationId,
+      message: input.trim(),
       sender: 'user',
       timestamp: new Date(),
-      conversation_id: conversationId,
     };
 
     setMessages((prev) => [...prev, userMessage]);
@@ -49,17 +51,17 @@ export function ChatWidget() {
 
     try {
       const response = await sendMessageToN8N(
-        userMessage.text,
+        userMessage.message,
         contactInfo,
         conversationId
       );
 
       const aiMessage: Message = {
         id: crypto.randomUUID(),
-        text: response.reply,
+        conversation_id: conversationId,
+        message: response.reply,
         sender: 'ai',
         timestamp: new Date(),
-        conversation_id: conversationId,
       };
 
       setMessages((prev) => [...prev, aiMessage]);
@@ -225,18 +227,18 @@ function ChatMessages({
               key={message.id}
               className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in`}
             >
-              <div
-                className={`rounded-lg px-4 py-2 max-w-[80%] ${
-                  message.sender === 'user'
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted'
-                }`}
-              >
-                <p className="text-sm">{message.text}</p>
-                <p className="text-xs opacity-70 mt-1">
-                  {formatDistanceToNow(message.timestamp, { addSuffix: true })}
-                </p>
-              </div>
+                    <div
+                      className={`rounded-lg px-4 py-2 max-w-[80%] ${
+                        message.sender === 'user'
+                          ? 'bg-primary text-primary-foreground'
+                          : 'bg-muted'
+                      }`}
+                    >
+                      <p className="text-sm">{message.message}</p>
+                      <p className="text-xs opacity-70 mt-1">
+                        {formatDistanceToNow(message.timestamp, { addSuffix: true })}
+                      </p>
+                    </div>
             </div>
           ))}
           {isLoading && (

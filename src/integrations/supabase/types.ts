@@ -16,6 +16,8 @@ export type Database = {
     Tables: {
       leads: {
         Row: {
+          ai_response: string | null
+          conversation_id: string
           created_at: string
           customer_name: string
           email: string
@@ -28,6 +30,8 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          ai_response?: string | null
+          conversation_id: string
           created_at?: string
           customer_name: string
           email: string
@@ -40,6 +44,8 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          ai_response?: string | null
+          conversation_id?: string
           created_at?: string
           customer_name?: string
           email?: string
@@ -57,22 +63,22 @@ export type Database = {
         Row: {
           conversation_id: string
           id: string
+          message: string
           sender: string
-          text: string
           timestamp: string
         }
         Insert: {
           conversation_id: string
           id?: string
+          message: string
           sender: string
-          text: string
           timestamp?: string
         }
         Update: {
           conversation_id?: string
           id?: string
+          message?: string
           sender?: string
-          text?: string
           timestamp?: string
         }
         Relationships: []

@@ -84,7 +84,7 @@ export function ConversationPanel({ lead, messages, onClose }: ConversationPanel
                           : 'bg-background border shadow-sm'
                       }`}
                     >
-                      <p className="text-sm whitespace-pre-wrap break-words">{message.text}</p>
+                      <p className="text-sm whitespace-pre-wrap break-words">{message.message}</p>
                       <p className={`text-xs mt-2 ${
                         message.sender === 'user' 
                           ? 'text-primary-foreground/70' 

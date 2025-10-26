@@ -1,20 +1,22 @@
 export interface Message {
   id: string;
-  text: string;
+  conversation_id: string;
+  message: string;
   sender: 'user' | 'ai';
   timestamp: Date;
-  conversation_id?: string;
 }
 
 export interface Lead {
   id: string;
+  conversation_id: string;
   customer_name: string;
   phone: string;
   email: string;
-  intent: string;
+  intent: 'emergency_repair' | 'quote_request' | 'general_inquiry' | 'scheduling';
   priority: 'low' | 'medium' | 'high';
   status: 'new' | 'in_progress' | 'completed';
   message: string;
+  ai_response?: string;
   created_at: string;
   updated_at?: string;
 }
