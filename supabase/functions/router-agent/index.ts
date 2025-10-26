@@ -18,7 +18,10 @@ serve(async (req) => {
       throw new Error('LOVABLE_API_KEY not configured');
     }
 
-    console.log('Router Agent received message:', message);
+    // Extract message text - handle both string and object formats
+    const messageText = typeof message === 'string' ? message : message?.body || '';
+    
+    console.log('Router Agent received message:', messageText);
 
     // Call Lovable AI to classify intent
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
@@ -49,7 +52,7 @@ Routing logic:
           })),
           {
             role: 'user',
-            content: message
+            content: messageText
           }
         ],
       }),
