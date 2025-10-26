@@ -53,7 +53,17 @@ function KanbanColumn({ title, droppableId, leads }: KanbanColumnProps) {
             }`}
           >
             {leads.map((lead, index) => (
-              <LeadCard key={lead.id} lead={lead} index={index} onClick={() => {}} />
+              <Draggable key={lead.id} draggableId={lead.id} index={index}>
+                {(provided) => (
+                  <div
+                    ref={provided.innerRef}
+                    {...provided.draggableProps}
+                    {...provided.dragHandleProps}
+                  >
+                    <LeadCard lead={lead} index={index} onClick={() => {}} />
+                  </div>
+                )}
+              </Draggable>
             ))}
             {leads.length === 0 && (
               <p className="text-sm text-muted-foreground text-center py-8">

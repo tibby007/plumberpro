@@ -27,7 +27,7 @@ const Dashboard = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setLeads(data || []);
+      setLeads((data || []) as Lead[]);
     } catch (error) {
       console.error('Error fetching leads:', error);
       toast({
@@ -108,7 +108,14 @@ const Dashboard = () => {
         .order('timestamp', { ascending: true });
 
       if (error) throw error;
-      setMessages(data || []);
+      
+      // Transform timestamps to Date objects
+      const transformedMessages: Message[] = (data || []).map(msg => ({
+        ...msg,
+        timestamp: new Date(msg.timestamp),
+      } as Message));
+      
+      setMessages(transformedMessages);
     } catch (error) {
       console.error('Error fetching messages:', error);
       toast({
