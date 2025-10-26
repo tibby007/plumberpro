@@ -5,9 +5,10 @@ import type { Lead } from '@/types';
 interface KanbanBoardProps {
   leads: Lead[];
   onStatusChange: (leadId: string, newStatus: Lead['status']) => void;
+  onLeadClick: (lead: Lead) => void;
 }
 
-export function KanbanBoard({ leads, onStatusChange }: KanbanBoardProps) {
+export function KanbanBoard({ leads, onStatusChange, onLeadClick }: KanbanBoardProps) {
   const handleDragEnd = (result: DropResult) => {
     if (!result.destination) return;
 
@@ -22,9 +23,9 @@ export function KanbanBoard({ leads, onStatusChange }: KanbanBoardProps) {
   return (
     <DragDropContext onDragEnd={handleDragEnd}>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-full">
-        <KanbanColumn title="New" droppableId="new" leads={newLeads} />
-        <KanbanColumn title="In Progress" droppableId="in_progress" leads={inProgressLeads} />
-        <KanbanColumn title="Completed" droppableId="completed" leads={completedLeads} />
+        <KanbanColumn title="New" droppableId="new" leads={newLeads} onLeadClick={onLeadClick} />
+        <KanbanColumn title="In Progress" droppableId="in_progress" leads={inProgressLeads} onLeadClick={onLeadClick} />
+        <KanbanColumn title="Completed" droppableId="completed" leads={completedLeads} onLeadClick={onLeadClick} />
       </div>
     </DragDropContext>
   );
@@ -34,9 +35,10 @@ interface KanbanColumnProps {
   title: string;
   droppableId: string;
   leads: Lead[];
+  onLeadClick: (lead: Lead) => void;
 }
 
-function KanbanColumn({ title, droppableId, leads }: KanbanColumnProps) {
+function KanbanColumn({ title, droppableId, leads, onLeadClick }: KanbanColumnProps) {
   return (
     <div className="flex flex-col bg-muted/50 rounded-lg p-4">
       <div className="flex items-center justify-between mb-4">
@@ -60,7 +62,7 @@ function KanbanColumn({ title, droppableId, leads }: KanbanColumnProps) {
                     {...provided.draggableProps}
                     {...provided.dragHandleProps}
                   >
-                    <LeadCard lead={lead} index={index} onClick={() => {}} />
+                    <LeadCard lead={lead} index={index} onClick={() => onLeadClick(lead)} />
                   </div>
                 )}
               </Draggable>

@@ -145,7 +145,11 @@ const Dashboard = () => {
         </header>
 
         <div className="relative">
-          <KanbanBoard leads={leads} onStatusChange={handleStatusChange} />
+          <KanbanBoard 
+            leads={leads} 
+            onStatusChange={handleStatusChange}
+            onLeadClick={handleLeadClick}
+          />
           <ConversationPanel
             lead={selectedLead}
             messages={messages}
