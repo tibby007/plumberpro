@@ -36,12 +36,11 @@ const Hero = () => {
             </div>
             
             <h1 className="text-white mb-6 leading-tight">
-              Fast, Reliable Plumbing
-              <span className="block text-accent">When You Need It Most</span>
+              24/7 Emergency Plumbing Help
             </h1>
             
             <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto leading-relaxed">
-              Professional plumbing services with instant booking. Emergency repairs, maintenance, and installations by certified experts.
+              Chat with our AI assistant - get instant quotes and book service
             </p>
           </div>
 
