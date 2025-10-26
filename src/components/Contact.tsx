@@ -74,26 +74,28 @@ const Contact = () => {
                   size="lg" 
                   className="w-full"
                   onClick={() => {
-                    console.log('Button clicked, checking for LeadConnector...', window.LeadConnector);
-                    if (window.LeadConnector && typeof window.LeadConnector.openWidget === 'function') {
-                      window.LeadConnector.openWidget();
-                      setTimeout(() => {
-                        const chatInput = document.querySelector('[data-testid="chat-input"], textarea, input[type="text"]') as HTMLInputElement | HTMLTextAreaElement;
-                        if (chatInput) {
-                          chatInput.value = "Hi, I need help with a plumbing issue.";
-                          chatInput.dispatchEvent(new Event('input', { bubbles: true }));
+                    // Wait for widget to be ready, then open it
+                    const openChatWidget = () => {
+                      const chatWidget = document.querySelector('chat-widget');
+                      if (chatWidget) {
+                        const shadowRoot = chatWidget.shadowRoot;
+                        if (shadowRoot) {
+                          const chatButton = shadowRoot.querySelector('[class*="btn"]') as HTMLElement;
+                          if (chatButton) {
+                            chatButton.click();
+                            return;
+                          }
                         }
-                      }, 500);
-                    } else {
-                      console.error('LeadConnector widget not loaded yet');
-                      // Fallback: try to find and click the widget bubble directly
-                      const widgetBubble = document.querySelector('[data-testid="chat-bubble"], .chat-widget-bubble, iframe[title*="chat"]') as HTMLElement;
-                      if (widgetBubble) {
-                        widgetBubble.click();
-                      } else {
-                        alert('Chat widget is still loading. Please try again in a moment.');
                       }
-                    }
+                      
+                      // Fallback to LeadConnector API if available
+                      if (window.LeadConnector && typeof window.LeadConnector.openWidget === 'function') {
+                        window.LeadConnector.openWidget();
+                      }
+                    };
+
+                    // Try immediately
+                    openChatWidget();
                   }}
                 >
                   Start Chat Now
