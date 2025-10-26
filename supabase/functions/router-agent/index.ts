@@ -4,28 +4,25 @@ serve(async (req) => {
   try {
     const body = await req.json();
 
-    // Log the raw incoming message for debugging
     console.log("Incoming payload:", JSON.stringify(body));
 
-    let rawMessage = body.message;
-
-    // Handle various shapes of incoming message
-    if (rawMessage === null || rawMessage === undefined) {
-      rawMessage = "";
-    } else if (typeof rawMessage === "object") {
-      // if it's an object, try to extract text or stringify
-      rawMessage = rawMessage.text || JSON.stringify(rawMessage);
-    } else if (Array.isArray(rawMessage)) {
-      rawMessage = rawMessage.join(" ");
-    } else if (typeof rawMessage !== "string") {
-      rawMessage = String(rawMessage);
+    // Extract message text safely
+    let rawMessage = "";
+    if (body.message) {
+      if (typeof body.message === "object" && body.message.body) {
+        rawMessage = body.message.body;
+      } else if (typeof body.message === "string") {
+        rawMessage = body.message;
+      } else {
+        rawMessage = JSON.stringify(body.message);
+      }
     }
 
-    const message = rawMessage.trim();
+    const message = (rawMessage || "").trim();
 
     const conversationId = body.conversation_id || body.conversationId || "";
     const contact = body.contact || {};
-    const name = contact.name || "";
+    const name = contact.name || body.full_name || "";
     const phone = contact.phone || "";
     const email = contact.email || "";
 
@@ -67,6 +64,8 @@ serve(async (req) => {
           ? "Let's book your appointment. Please provide your availability."
           : "Thanks for reaching out. How can we help you today?",
     };
+
+    console.log("Router Agent response:", responsePayload);
 
     return new Response(JSON.stringify(responsePayload), {
       headers: { "Content-Type": "application/json" },
