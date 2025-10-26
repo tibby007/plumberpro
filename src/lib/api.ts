@@ -22,9 +22,13 @@ export async function sendMessageToN8N(
     try {
       const payload = {
         message,
-        contact,
-        conversation_id: conversationId,
+        customerName: contact.name,
+        phone: contact.phone,
+        email: contact.email,
+        conversationId: conversationId,
       };
+
+      console.log('Sending to n8n:', payload);
 
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
