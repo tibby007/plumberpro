@@ -248,7 +248,7 @@ function ChatMessages({
         </div>
       </ScrollArea>
 
-      <div className="p-4 border-t">
+      <div className="p-4 border-t space-y-3">
         <div className="flex gap-2">
           <Textarea
             placeholder="Type your message..."
@@ -269,6 +269,9 @@ function ChatMessages({
             <Send className="h-4 w-4" />
           </Button>
         </div>
+        <p className="text-xs text-muted-foreground text-center">
+          By using this chat, you consent to receive text messages and communications from PlumberPro. Message and data rates may apply. Reply STOP to opt out.
+        </p>
       </div>
     </div>
   );
