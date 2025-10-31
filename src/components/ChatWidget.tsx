@@ -185,6 +185,9 @@ function ContactForm({ onSubmit }: ContactFormProps) {
       <Button type="submit" className="w-full">
         Start Chat
       </Button>
+      <p className="text-xs text-muted-foreground text-center">
+        By using this chat, you consent to receive text messages and communications from PlumberPro. Message and data rates may apply. Reply STOP to opt out.
+      </p>
     </form>
   );
 }
