@@ -37,13 +37,16 @@ const Footer = () => {
             <h4 className="font-semibold mb-4">Company</h4>
             <ul className="space-y-2 text-background/70">
               <li>About Us</li>
-              <li>Careers</li>
               <li>
                 <a href="/privacy-policy" className="hover:text-background transition-colors">
                   Privacy Policy
                 </a>
               </li>
-              <li>Terms of Service</li>
+              <li>
+                <a href="/terms-of-service" className="hover:text-background transition-colors">
+                  Terms of Service
+                </a>
+              </li>
               <li>Contact</li>
             </ul>
           </div>
