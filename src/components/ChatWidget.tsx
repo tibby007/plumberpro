@@ -205,7 +205,10 @@ function ContactForm({ onSubmit }: ContactFormProps) {
         Start Chat
       </Button>
       <p className="text-xs text-muted-foreground text-center">
-        By using this chat, you consent to receive text messages and communications from PlumberPro. Message and data rates may apply. Reply STOP to opt out.
+        By providing your phone number and starting the chat, you consent to receive service messages and appointment updates from PlumberPro. Message/data rates may apply. Reply STOP to opt out. See our{" "}
+        <a href="https://plumberpro.lovable.app/privacy-policy" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+          privacy policy
+        </a>
       </p>
     </form>
   );
@@ -292,7 +295,10 @@ function ChatMessages({
           </Button>
         </div>
         <p className="text-xs text-muted-foreground text-center">
-          By using this chat, you consent to receive text messages and communications from PlumberPro. Message and data rates may apply. Reply STOP to opt out.
+          By providing your phone number and starting the chat, you consent to receive service messages and appointment updates from PlumberPro. Message/data rates may apply. Reply STOP to opt out. See our{" "}
+          <a href="https://plumberpro.lovable.app/privacy-policy" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+            privacy policy
+          </a>
         </p>
       </div>
     </div>
