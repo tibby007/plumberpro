@@ -8,6 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { sendMessageToN8N } from '@/lib/api';
 import type { Message, ContactInfo } from '@/types';
 import { formatDistanceToNow } from 'date-fns';
+import { z } from 'zod';
 
 interface ChatWidgetProps {
   embedded?: boolean;
@@ -122,6 +123,25 @@ interface ContactFormProps {
   onSubmit: (info: ContactInfo) => void;
 }
 
+// Validation schema for contact information
+const contactSchema = z.object({
+  name: z.string()
+    .min(2, "Name must be at least 2 characters")
+    .max(100, "Name must be less than 100 characters")
+    .regex(/^[a-zA-Z\s'-]+$/, "Name contains invalid characters"),
+  phone: z.string()
+    .regex(/^[\d\s()+-]+$/, "Phone number contains invalid characters")
+    .min(10, "Phone number must be at least 10 digits")
+    .max(20, "Phone number is too long"),
+  email: z.string()
+    .email("Invalid email address")
+    .max(255, "Email is too long"),
+}).transform((data) => ({
+  name: data.name.trim(),
+  phone: data.phone.trim(),
+  email: data.email.trim(),
+}));
+
 function ContactForm({ onSubmit }: ContactFormProps) {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
@@ -131,25 +151,24 @@ function ContactForm({ onSubmit }: ContactFormProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!name.trim() || !phone.trim() || !email.trim()) {
+    // Validate using zod schema
+    const result = contactSchema.safeParse({ 
+      name: name.trim(), 
+      phone: phone.trim(), 
+      email: email.trim() 
+    });
+    
+    if (!result.success) {
+      const firstError = result.error.errors[0];
       toast({
-        title: 'Missing Information',
-        description: 'Please fill in all fields.',
+        title: 'Validation Error',
+        description: firstError.message,
         variant: 'destructive',
       });
       return;
     }
 
-    if (!/^\S+@\S+\.\S+$/.test(email)) {
-      toast({
-        title: 'Invalid Email',
-        description: 'Please enter a valid email address.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    onSubmit({ name: name.trim(), phone: phone.trim(), email: email.trim() });
+    onSubmit(result.data);
   };
 
   return (

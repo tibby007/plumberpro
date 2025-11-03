@@ -28,7 +28,10 @@ export async function sendMessageToN8N(
         conversationId: conversationId,
       };
 
-      console.log('Sending to n8n:', payload);
+      // Only log in development to prevent sensitive data exposure
+      if (import.meta.env.DEV) {
+        console.log('Sending to n8n:', payload);
+      }
 
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
