@@ -20,7 +20,7 @@ interface CustomerInfo {
 }
 
 // Constants
-const WEBHOOK_URL = 'https://n8n.srv998244.hstgr.cloud/webhook/plumberpro-chat';
+const WEBHOOK_URL = import.meta.env.VITE_N8N_WEBHOOK_URL || 'https://n8n.srv998244.hstgr.cloud/webhook/plumberpro-chat';
 const CONVERSATION_ID_KEY = 'plumberpro_conversation_id';
 const CUSTOMER_INFO_KEY = 'plumberpro_customer_info';
 
@@ -83,6 +83,9 @@ export default function EmbeddedChatWidget() {
     }
   }, []);
 
+  // Ref to store handleSendMessage for use in speech recognition
+  const handleSendMessageRef = useRef<(() => void) | null>(null);
+
   // Initialize Web Speech API
   useEffect(() => {
     if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
@@ -134,13 +137,10 @@ export default function EmbeddedChatWidget() {
         setIsRecording(false);
         setIsListening(false);
 
-        // Auto-send the transcribed message
+        // Auto-send the transcribed message using ref
         setTimeout(() => {
-          if (finalTranscriptRef.current.trim()) {
-            const sendButton = document.querySelector('[data-chat-send-button]') as HTMLButtonElement;
-            if (sendButton && !sendButton.disabled) {
-              sendButton.click();
-            }
+          if (finalTranscriptRef.current.trim() && handleSendMessageRef.current) {
+            handleSendMessageRef.current();
           }
         }, 500);
       };
@@ -184,7 +184,15 @@ export default function EmbeddedChatWidget() {
     };
 
     setCustomerInfo(info);
-    localStorage.setItem(CUSTOMER_INFO_KEY, JSON.stringify(info));
+
+    // Store customer info in localStorage with error handling
+    try {
+      localStorage.setItem(CUSTOMER_INFO_KEY, JSON.stringify(info));
+    } catch (error) {
+      console.error('Failed to save customer info to localStorage:', error);
+      // Continue even if localStorage fails - functionality should work without it
+    }
+
     setShowCustomerForm(false);
 
     // Add welcome message with Sarah persona
@@ -209,7 +217,14 @@ export default function EmbeddedChatWidget() {
     if (!convId) {
       convId = uuidv4();
       setConversationId(convId);
-      localStorage.setItem(CONVERSATION_ID_KEY, convId);
+
+      // Store conversation ID in localStorage with error handling
+      try {
+        localStorage.setItem(CONVERSATION_ID_KEY, convId);
+      } catch (error) {
+        console.error('Failed to save conversation ID to localStorage:', error);
+        // Continue even if localStorage fails - conversation will still work
+      }
     }
 
     // Add user message
@@ -226,6 +241,9 @@ export default function EmbeddedChatWidget() {
     setIsTyping(true);
 
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+
       const response = await fetch(WEBHOOK_URL, {
         method: 'POST',
         headers: {
@@ -238,7 +256,10 @@ export default function EmbeddedChatWidget() {
           phone: customerInfo?.phone || null,
           email: customerInfo?.email || null,
         }),
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -248,14 +269,18 @@ export default function EmbeddedChatWidget() {
 
       // Parse JSON response safely
       const responseText = await response.text();
-      console.log('Raw response:', responseText);
+      if (import.meta.env.DEV) {
+        console.log('Raw response:', responseText);
+      }
 
-      let data;
+      let data: { response?: string; reply?: string; intent?: string; urgency?: string; lead_score?: number };
       try {
         data = responseText ? JSON.parse(responseText) : {};
       } catch (parseError) {
         console.error('JSON parse error:', parseError);
-        console.log('Response text:', responseText);
+        if (import.meta.env.DEV) {
+          console.log('Response text:', responseText);
+        }
         // If JSON parsing fails, use default response
         data = { response: 'Thanks for your message. Someone will get back to you soon!' };
       }
@@ -269,8 +294,8 @@ export default function EmbeddedChatWidget() {
       };
       setMessages((prev) => [...prev, aiMessage]);
 
-      // Log additional data for debugging
-      if (data.intent || data.urgency || data.lead_score) {
+      // Log additional data for debugging (development only - contains sensitive lead data)
+      if (import.meta.env.DEV && (data.intent || data.urgency || data.lead_score)) {
         console.log('Lead classification:', {
           intent: data.intent,
           urgency: data.urgency,
@@ -282,7 +307,9 @@ export default function EmbeddedChatWidget() {
 
       let errorContent = 'Sorry, there was an error sending your message. Please try again.';
 
-      if (error instanceof TypeError && error.message.includes('fetch')) {
+      if (error instanceof Error && error.name === 'AbortError') {
+        errorContent = 'Request timed out. Please check your internet connection and try again.';
+      } else if (error instanceof TypeError && error.message.includes('fetch')) {
         errorContent = 'Unable to connect to our servers. Please check your internet connection and try again.';
       } else if (error instanceof Error && error.message.includes('HTTP')) {
         errorContent = 'Our chat service is temporarily unavailable. Please try again in a moment or call us directly.';
@@ -300,6 +327,11 @@ export default function EmbeddedChatWidget() {
       setIsTyping(false);
     }
   }, [inputValue, isSending, conversationId, customerInfo]);
+
+  // Update ref for speech recognition to use
+  useEffect(() => {
+    handleSendMessageRef.current = handleSendMessage;
+  }, [handleSendMessage]);
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -516,7 +548,7 @@ export default function EmbeddedChatWidget() {
                   className="w-full resize-none"
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
-                  onKeyPress={handleKeyPress}
+                  onKeyDown={handleKeyPress}
                   disabled={isSending}
                   maxLength={1000}
                   aria-label="Message input"
@@ -551,7 +583,6 @@ export default function EmbeddedChatWidget() {
                 size="icon"
                 className="flex-shrink-0 bg-blue-600 hover:bg-blue-700 disabled:opacity-50"
                 aria-label="Send message"
-                data-chat-send-button
               >
                 {isSending ? (
                   <Loader2 className="w-5 h-5 animate-spin" />

@@ -17,9 +17,13 @@ interface CustomerInfo {
 }
 
 // Constants
-const WEBHOOK_URL = 'https://n8n.srv998244.hstgr.cloud/webhook/plumberpro-chat';
+const WEBHOOK_URL = import.meta.env.VITE_N8N_WEBHOOK_URL || 'https://n8n.srv998244.hstgr.cloud/webhook/plumberpro-chat';
 const CONVERSATION_ID_KEY = 'plumberpro_conversation_id';
 const CUSTOMER_INFO_KEY = 'plumberpro_customer_info';
+
+// WARNING: Storing PII in localStorage poses privacy and compliance risks
+// In production, consider: sessionStorage, encryption, or server-side storage
+// localStorage is not encrypted and persists across browser sessions
 
 export default function VoiceWidget() {
   // State
@@ -92,7 +96,15 @@ export default function VoiceWidget() {
     };
 
     setCustomerInfo(info);
-    localStorage.setItem(CUSTOMER_INFO_KEY, JSON.stringify(info));
+
+    // Store customer info in localStorage with error handling
+    try {
+      localStorage.setItem(CUSTOMER_INFO_KEY, JSON.stringify(info));
+    } catch (error) {
+      console.error('Failed to save customer info to localStorage:', error);
+      // Continue even if localStorage fails - functionality should work without it
+    }
+
     setShowCustomerForm(false);
 
     // Add welcome message
@@ -116,7 +128,14 @@ export default function VoiceWidget() {
     if (!convId) {
       convId = uuidv4();
       setConversationId(convId);
-      localStorage.setItem(CONVERSATION_ID_KEY, convId);
+
+      // Store conversation ID in localStorage with error handling
+      try {
+        localStorage.setItem(CONVERSATION_ID_KEY, convId);
+      } catch (error) {
+        console.error('Failed to save conversation ID to localStorage:', error);
+        // Continue even if localStorage fails - conversation will still work
+      }
     }
 
     // Add user message
@@ -133,6 +152,9 @@ export default function VoiceWidget() {
     setIsTyping(true);
 
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+
       const response = await fetch(WEBHOOK_URL, {
         method: 'POST',
         headers: {
@@ -145,7 +167,10 @@ export default function VoiceWidget() {
           phone: customerInfo?.phone || null,
           email: customerInfo?.email || null,
         }),
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -162,8 +187,8 @@ export default function VoiceWidget() {
       };
       setMessages((prev) => [...prev, aiMessage]);
 
-      // Log additional data for debugging (optional)
-      if (data.intent || data.urgency || data.lead_score) {
+      // Log additional data for debugging (development only - contains sensitive lead data)
+      if (import.meta.env.DEV && (data.intent || data.urgency || data.lead_score)) {
         console.log('Lead classification:', {
           intent: data.intent,
           urgency: data.urgency,
@@ -176,7 +201,9 @@ export default function VoiceWidget() {
       // Determine error type
       let errorContent = 'Sorry, there was an error sending your message. Please try again.';
 
-      if (error instanceof TypeError && error.message.includes('fetch')) {
+      if (error instanceof Error && error.name === 'AbortError') {
+        errorContent = 'Request timed out. Please check your internet connection and try again.';
+      } else if (error instanceof TypeError && error.message.includes('fetch')) {
         errorContent = 'Unable to connect to our servers. Please check your internet connection and try again.';
       } else if (error instanceof Error && error.message.includes('HTTP')) {
         errorContent = 'Our chat service is temporarily unavailable. Please try again in a moment or call us directly.';

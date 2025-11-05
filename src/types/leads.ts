@@ -166,11 +166,11 @@ export interface CreateLeadInput {
   customer_phone?: string;
   customer_email?: string;
   customer_address?: string;
-  intent: Intent | string;
-  issue_type?: IssueType | string;
+  intent: Intent;
+  issue_type?: IssueType;
   issue_description?: string;
   urgency_score?: number;
-  source: LeadSource | string;
+  source: LeadSource;
   device?: string;
   referrer?: string;
   utm_params?: Record<string, string>;
@@ -182,8 +182,8 @@ export interface CreateLeadInput {
  * Data for updating lead status
  */
 export interface UpdateLeadStatusInput {
-  status: LeadStatus | string;
-  substatus?: LeadSubstatus | string;
+  status: LeadStatus;
+  substatus?: LeadSubstatus;
   notes?: string;
   assigned_to?: string;
 }
@@ -194,7 +194,7 @@ export interface UpdateLeadStatusInput {
 export interface CreateMessageInput {
   conversation_id: string;
   client_id: string;
-  role: MessageRole | string;
+  role: MessageRole;
   content: string;
   intent?: string;
   confidence?: number;
@@ -468,9 +468,16 @@ export function getTimeAgo(timestamp: string): string {
   const seconds = Math.floor((now.getTime() - then.getTime()) / 1000);
 
   if (seconds < 60) return 'just now';
-  if (seconds < 3600) return `${Math.floor(seconds / 60)} minutes ago`;
-  if (seconds < 86400) return `${Math.floor(seconds / 3600)} hours ago`;
-  if (seconds < 604800) return `${Math.floor(seconds / 86400)} days ago`;
+
+  const minutes = Math.floor(seconds / 60);
+  if (seconds < 3600) return `${minutes} ${minutes === 1 ? 'minute' : 'minutes'} ago`;
+
+  const hours = Math.floor(seconds / 3600);
+  if (seconds < 86400) return `${hours} ${hours === 1 ? 'hour' : 'hours'} ago`;
+
+  const days = Math.floor(seconds / 86400);
+  if (seconds < 604800) return `${days} ${days === 1 ? 'day' : 'days'} ago`;
+
   return then.toLocaleDateString();
 }
 
