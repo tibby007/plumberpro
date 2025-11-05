@@ -84,6 +84,16 @@ export default {
           "0%": { transform: "translateX(100%)" },
           "100%": { transform: "translateX(0)" },
         },
+        "emergency-pulse": {
+          "0%, 100%": {
+            opacity: "1",
+            boxShadow: "0 0 0 0 rgba(220, 38, 38, 0.7)"
+          },
+          "50%": {
+            opacity: "0.85",
+            boxShadow: "0 0 20px 10px rgba(220, 38, 38, 0.4)"
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -91,6 +101,7 @@ export default {
         "fade-in": "fade-in 0.3s ease-out",
         "scale-in": "scale-in 0.2s ease-out",
         "slide-in-right": "slide-in-right 0.3s ease-out",
+        "emergency-pulse": "emergency-pulse 1.5s ease-in-out infinite",
       },
     },
   },

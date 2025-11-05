@@ -1,32 +1,99 @@
-export interface Message {
-  id: string;
-  conversation_id: string;
-  message: string;
-  sender: 'user' | 'ai';
-  timestamp: Date;
-}
+/**
+ * Central Type Exports
+ *
+ * Re-export all types from database and domain-specific modules
+ */
 
-export interface Lead {
-  id: string;
-  conversation_id: string;
-  customer_name: string;
-  phone: string;
-  email: string;
-  intent: 'emergency_repair' | 'quote_request' | 'general_inquiry' | 'scheduling';
-  priority: 'low' | 'medium' | 'high';
-  status: 'new' | 'in_progress' | 'completed';
-  message: string;
-  ai_response?: string;
-  created_at: string;
-  updated_at?: string;
-}
+// Database types
+export type { Database, Json, Tables, TablesInsert, TablesUpdate } from './database';
 
+// Lead domain types
+export type {
+  // Base interfaces
+  Lead,
+  Conversation,
+  Message,
+  CallLog,
+  Client,
+  TeamMember,
+
+  // Extended types
+  LeadWithConversation,
+  LeadWithMessages,
+  LeadWithClient,
+  LeadWithTeamMember,
+  LeadDetails,
+
+  // Input types
+  CreateLeadInput,
+  UpdateLeadStatusInput,
+  CreateMessageInput,
+  CreateConversationInput,
+
+  // Filter/Query types
+  LeadFilters,
+  LeadSort,
+  PaginationOptions,
+  LeadQueryParams,
+
+  // Response types
+  LeadsResponse,
+  LeadConversationResponse,
+  DashboardStats,
+  LeadsByStatus,
+
+  // Utility types
+  LeadMetadata,
+  ConversationContext,
+  MessageMetadata,
+  FunctionCall,
+  UrgencyScore,
+  LeadScore,
+} from './leads';
+
+// Enums
+export {
+  Intent,
+  UrgencyLevel,
+  LeadStatus,
+  LeadSubstatus,
+  LeadSource,
+  IssueType,
+  MessageRole,
+  ConversationStatus,
+} from './leads';
+
+// Helper functions
+export {
+  isIntent,
+  isLeadStatus,
+  isUrgencyLevel,
+  isEmergencyLead,
+  isUrgentLead,
+  needsFollowUp,
+  getUrgencyLevel,
+  getUrgencyEmoji,
+  formatPhoneNumber,
+  getTimeAgo,
+  getStatusColor,
+} from './leads';
+
+// ============================================================================
+// Legacy types (deprecated - kept for backward compatibility)
+// ============================================================================
+
+/**
+ * @deprecated Use CreateMessageInput instead
+ */
 export interface ContactInfo {
   name: string;
   phone: string;
   email: string;
 }
 
+/**
+ * @deprecated Use LeadConversationResponse instead
+ */
 export interface ApiResponse {
   id?: string;
   reply?: string;
