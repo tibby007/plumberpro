@@ -1,7 +1,10 @@
+import { lazy, Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { Phone, Sparkles } from "lucide-react";
 import heroImage from "@/assets/hero-plumber.jpg";
-import EmbeddedChatWidget from "@/components/EmbeddedChatWidget";
+
+// Lazy load chat widget to split bundle
+const EmbeddedChatWidget = lazy(() => import("@/components/EmbeddedChatWidget"));
 
 const Hero = () => {
   return (
@@ -101,7 +104,16 @@ const Hero = () => {
 
             {/* Right: Embedded Chat Widget */}
             <div id="embedded-chat-widget" className="order-1 lg:order-2 flex justify-center lg:justify-end">
-              <EmbeddedChatWidget />
+              <Suspense fallback={
+                <div className="w-full max-w-[500px] mx-auto h-[600px] bg-white rounded-xl shadow-2xl flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+                    <p className="text-gray-600">Loading chat...</p>
+                  </div>
+                </div>
+              }>
+                <EmbeddedChatWidget />
+              </Suspense>
             </div>
           </div>
         </div>
