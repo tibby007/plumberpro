@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Bot, Send, Loader2, Mic, MicOff, User } from 'lucide-react';
+import { Bot, Send, Loader2, Mic, MicOff, User, Phone, MessageSquare } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
+import { VoiceCallWidget } from '@/components/VoiceCallWidget';
 
 // Types
 interface ChatMessage {
@@ -23,6 +24,8 @@ interface CustomerInfo {
 const WEBHOOK_URL = import.meta.env.VITE_N8N_WEBHOOK_URL || 'https://n8n.srv998244.hstgr.cloud/webhook/plumberpro-chat';
 const CONVERSATION_ID_KEY = 'plumberpro_conversation_id';
 const CUSTOMER_INFO_KEY = 'plumberpro_customer_info';
+// ElevenLabs Agent ID - configure this in ElevenLabs dashboard
+const ELEVENLABS_AGENT_ID = import.meta.env.VITE_ELEVENLABS_AGENT_ID || '';
 
 // Design Tokens
 const colors = {
@@ -46,6 +49,7 @@ export default function EmbeddedChatWidget() {
   const [conversationId, setConversationId] = useState<string>('');
   const [isRecording, setIsRecording] = useState(false);
   const [isListening, setIsListening] = useState(false);
+  const [mode, setMode] = useState<'chat' | 'voice'>('chat');
 
   // Refs
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -379,18 +383,44 @@ export default function EmbeddedChatWidget() {
 
   return (
     <div className="w-full max-w-[500px] mx-auto h-[600px] bg-white rounded-xl shadow-2xl flex flex-col overflow-hidden animate-fade-in">
-      {/* Header with Avatar */}
-      <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-4 flex items-center gap-3 shadow-md">
-        <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg">
-          <Bot className="w-7 h-7 text-blue-500" />
-        </div>
-        <div className="flex-1">
-          <div className="font-semibold text-lg">Sarah - PlumberPro Tech</div>
-          <div className="text-xs text-blue-100 flex items-center gap-2">
-            <span className="inline-block w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-            Online 24/7 - Ready to help
+      {/* Header with Avatar and Mode Toggle */}
+      <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-4 shadow-md">
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg">
+            <Bot className="w-7 h-7 text-blue-500" />
+          </div>
+          <div className="flex-1">
+            <div className="font-semibold text-lg">Sarah - PlumberPro Tech</div>
+            <div className="text-xs text-blue-100 flex items-center gap-2">
+              <span className="inline-block w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+              Online 24/7 - Ready to help
+            </div>
           </div>
         </div>
+        
+        {/* Mode Toggle - Only show after customer info is submitted */}
+        {!showCustomerForm && (
+          <div className="mt-3 flex gap-2">
+            <Button
+              variant={mode === 'chat' ? 'secondary' : 'ghost'}
+              size="sm"
+              onClick={() => setMode('chat')}
+              className={`flex-1 gap-2 ${mode === 'chat' ? 'bg-white/20 text-white' : 'text-white/70 hover:bg-white/10 hover:text-white'}`}
+            >
+              <MessageSquare className="w-4 h-4" />
+              Chat
+            </Button>
+            <Button
+              variant={mode === 'voice' ? 'secondary' : 'ghost'}
+              size="sm"
+              onClick={() => setMode('voice')}
+              className={`flex-1 gap-2 ${mode === 'voice' ? 'bg-white/20 text-white' : 'text-white/70 hover:bg-white/10 hover:text-white'}`}
+            >
+              <Phone className="w-4 h-4" />
+              Voice Call
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* Customer Info Form */}
@@ -465,8 +495,8 @@ export default function EmbeddedChatWidget() {
         </div>
       )}
 
-      {/* Messages Area */}
-      {!showCustomerForm && (
+      {/* Messages Area - Chat Mode */}
+      {!showCustomerForm && mode === 'chat' && (
         <>
           <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
             {messages.length === 0 && (
@@ -596,6 +626,35 @@ export default function EmbeddedChatWidget() {
             </div>
           </div>
         </>
+      )}
+
+      {/* Voice Call Mode */}
+      {!showCustomerForm && mode === 'voice' && (
+        <div className="flex-1 flex flex-col items-center justify-center p-6 bg-gradient-to-b from-blue-50 to-white">
+          <div className="text-center mb-8">
+            <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Phone className="w-10 h-10 text-blue-600" />
+            </div>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">Voice Assistant</h3>
+            <p className="text-gray-600 text-sm max-w-[300px]">
+              Speak directly with our AI assistant. Just click the button below and start talking!
+            </p>
+          </div>
+
+          <VoiceCallWidget agentId={ELEVENLABS_AGENT_ID} />
+
+          {!ELEVENLABS_AGENT_ID && (
+            <div className="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-lg text-center max-w-[300px]">
+              <p className="text-sm text-amber-800">
+                <strong>Setup Required:</strong> Configure your ElevenLabs Agent ID to enable voice calls.
+              </p>
+            </div>
+          )}
+
+          <div className="mt-6 text-xs text-gray-400 text-center">
+            Powered by ElevenLabs AI
+          </div>
+        </div>
       )}
 
       <style>{`
