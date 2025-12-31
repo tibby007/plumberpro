@@ -77,9 +77,8 @@ const Hero = () => {
               {/* CTA Buttons */}
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                 <Button
-                  variant="hero"
                   size="xl"
-                  className="bg-white hover:bg-white/90 text-blue-600 font-bold text-lg px-8 py-6 shadow-2xl"
+                  className="bg-green-500 hover:bg-green-600 text-white font-bold text-lg px-8 py-6 shadow-2xl border-2 border-green-400"
                   onClick={() => {
                     const chatWidget = document.querySelector('#embedded-chat-widget');
                     chatWidget?.scrollIntoView({ behavior: 'smooth', block: 'center' });
