@@ -24,8 +24,8 @@ interface CustomerInfo {
 const WEBHOOK_URL = import.meta.env.VITE_N8N_WEBHOOK_URL || 'https://n8n.srv998244.hstgr.cloud/webhook/plumberpro-chat';
 const CONVERSATION_ID_KEY = 'plumberpro_conversation_id';
 const CUSTOMER_INFO_KEY = 'plumberpro_customer_info';
-// ElevenLabs Agent ID - configure this in ElevenLabs dashboard
-const ELEVENLABS_AGENT_ID = import.meta.env.VITE_ELEVENLABS_AGENT_ID || '';
+// ElevenLabs Agent ID for PlumberPro voice assistant
+const ELEVENLABS_AGENT_ID = 'agent_4001kds30jp5emmsxdxb74kns47m';
 
 // Design Tokens
 const colors = {
