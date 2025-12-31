@@ -90,25 +90,25 @@ export function ConversationPanel({ lead, messages, onClose, onDelete, onComplet
           ) : (
             <ScrollArea className="h-full p-6">
               <div className="space-y-4">
-                {messages.map((message) => (
+                {messages.map((msg) => (
                   <div
-                    key={message.id}
-                    className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+                    key={msg.id}
+                    className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
                   >
                     <div
                       className={`rounded-lg px-4 py-3 max-w-[85%] ${
-                        message.sender === 'user'
+                        msg.sender === 'user'
                           ? 'bg-primary text-primary-foreground'
                           : 'bg-background border shadow-sm'
                       }`}
                     >
-                      <p className="text-sm whitespace-pre-wrap break-words">{message.message}</p>
+                      <p className="text-sm whitespace-pre-wrap break-words">{msg.message}</p>
                       <p className={`text-xs mt-2 ${
-                        message.sender === 'user' 
+                        msg.sender === 'user' 
                           ? 'text-primary-foreground/70' 
                           : 'text-muted-foreground'
                       }`}>
-                        {formatDistanceToNow(message.timestamp, { addSuffix: true })}
+                        {formatDistanceToNow(new Date(msg.timestamp), { addSuffix: true })}
                       </p>
                     </div>
                   </div>

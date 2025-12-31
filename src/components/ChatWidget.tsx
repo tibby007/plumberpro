@@ -29,20 +29,20 @@ export function ChatWidget({ embedded = false }: ChatWidgetProps) {
     setConversationId(newConversationId);
     
     // Add welcome message
-    const welcomeMessage: Message = {
+    const welcomeMessage = {
       id: crypto.randomUUID(),
       conversation_id: newConversationId,
       message: "Hi! I'm here to help with your plumbing needs. How can I assist you today?",
       sender: 'ai',
       timestamp: new Date(),
     };
-    setMessages([welcomeMessage]);
+    setMessages([welcomeMessage as Message]);
   };
 
   const sendMessage = async () => {
     if (!input.trim() || !contactInfo || isLoading) return;
 
-    const userMessage: Message = {
+    const userMessage = {
       id: crypto.randomUUID(),
       conversation_id: conversationId,
       message: input.trim(),
@@ -50,7 +50,7 @@ export function ChatWidget({ embedded = false }: ChatWidgetProps) {
       timestamp: new Date(),
     };
 
-    setMessages((prev) => [...prev, userMessage]);
+    setMessages((prev) => [...prev, userMessage as Message]);
     setInput('');
     setIsLoading(true);
 
@@ -61,15 +61,15 @@ export function ChatWidget({ embedded = false }: ChatWidgetProps) {
         conversationId
       );
 
-      const aiMessage: Message = {
+      const aiMessage = {
         id: response.id || crypto.randomUUID(),
         conversation_id: conversationId,
-        message: response.message || response.reply,
+        message: response.message || response.reply || '',
         sender: 'ai',
         timestamp: response.timestamp ? new Date(response.timestamp) : new Date(),
       };
 
-      setMessages((prev) => [...prev, aiMessage]);
+      setMessages((prev) => [...prev, aiMessage as Message]);
     } catch (error) {
       toast({
         title: 'Error',
@@ -243,21 +243,21 @@ function ChatMessages({
     <div className="flex flex-col h-full">
       <ScrollArea className="flex-1 p-4" ref={scrollRef}>
         <div className="space-y-4">
-          {messages.map((message) => (
+          {messages.map((msg) => (
             <div
-              key={message.id}
-              className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in`}
+              key={msg.id}
+              className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in`}
             >
                     <div
                       className={`rounded-lg px-4 py-2 max-w-[80%] ${
-                        message.sender === 'user'
+                        msg.sender === 'user'
                           ? 'bg-primary text-primary-foreground'
                           : 'bg-muted'
                       }`}
                     >
-                      <p className="text-sm">{message.message}</p>
+                      <p className="text-sm">{msg.message}</p>
                       <p className="text-xs opacity-70 mt-1">
-                        {formatDistanceToNow(message.timestamp, { addSuffix: true })}
+                        {formatDistanceToNow(new Date(msg.timestamp), { addSuffix: true })}
                       </p>
                     </div>
             </div>

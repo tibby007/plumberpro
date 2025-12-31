@@ -1,54 +1,14 @@
 /**
  * Central Type Exports
- *
- * Re-export all types from database and domain-specific modules
  */
 
 // Database types
-export type { Database, Json, Tables, TablesInsert, TablesUpdate } from './database';
+export type { Json, Tables, TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
 
 // Lead domain types
 export type {
-  // Base interfaces
   Lead,
-  Conversation,
   Message,
-  CallLog,
-  Client,
-  TeamMember,
-
-  // Extended types
-  LeadWithConversation,
-  LeadWithMessages,
-  LeadWithClient,
-  LeadWithTeamMember,
-  LeadDetails,
-
-  // Input types
-  CreateLeadInput,
-  UpdateLeadStatusInput,
-  CreateMessageInput,
-  CreateConversationInput,
-
-  // Filter/Query types
-  LeadFilters,
-  LeadSort,
-  PaginationOptions,
-  LeadQueryParams,
-
-  // Response types
-  LeadsResponse,
-  LeadConversationResponse,
-  DashboardStats,
-  LeadsByStatus,
-
-  // Utility types
-  LeadMetadata,
-  ConversationContext,
-  MessageMetadata,
-  FunctionCall,
-  UrgencyScore,
-  LeadScore,
 } from './leads';
 
 // Enums
@@ -79,21 +39,15 @@ export {
 } from './leads';
 
 // ============================================================================
-// Legacy types (deprecated - kept for backward compatibility)
+// Legacy types (for backward compatibility)
 // ============================================================================
 
-/**
- * @deprecated Use CreateMessageInput instead
- */
 export interface ContactInfo {
   name: string;
   phone: string;
   email: string;
 }
 
-/**
- * @deprecated Use LeadConversationResponse instead
- */
 export interface ApiResponse {
   id?: string;
   reply?: string;
