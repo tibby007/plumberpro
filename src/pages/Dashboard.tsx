@@ -218,13 +218,7 @@ const Dashboard = () => {
 
       if (error) throw error;
       
-      // Transform timestamps to Date objects
-      const transformedMessages: Message[] = (data || []).map(msg => ({
-        ...msg,
-        timestamp: new Date(msg.timestamp),
-      } as Message));
-      
-      setMessages(transformedMessages);
+      setMessages((data || []) as Message[]);
     } catch (error) {
       console.error('Error fetching messages:', error);
       toast({
