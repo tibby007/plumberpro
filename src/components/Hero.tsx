@@ -78,7 +78,7 @@ const Hero = () => {
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                 <Button
                   size="xl"
-                  className="bg-green-500 hover:bg-green-600 text-white font-bold text-lg px-8 py-6 shadow-2xl border-2 border-green-400"
+                  className="bg-green-500 hover:bg-green-600 text-white font-bold text-lg px-8 py-6 shadow-2xl border-2 border-green-400 animate-pulse hover:animate-none"
                   onClick={() => {
                     const chatWidget = document.querySelector('#embedded-chat-widget');
                     chatWidget?.scrollIntoView({ behavior: 'smooth', block: 'center' });

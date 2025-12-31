@@ -115,7 +115,7 @@ export function VoiceCallWidget({ agentId, className }: VoiceCallWidgetProps) {
       <div className="flex items-center gap-2 text-sm">
         {isConnected ? (
           <>
-            <div className={`w-3 h-3 rounded-full ${isSpeaking ? 'bg-green-500 animate-pulse' : 'bg-blue-500'}`} />
+            <div className={`w-3 h-3 rounded-full ${isSpeaking ? 'bg-green-500 animate-pulse' : 'bg-blue-500 animate-pulse'}`} />
             <span className="text-muted-foreground">
               {isSpeaking ? "AI is speaking..." : "Listening..."}
             </span>
@@ -123,11 +123,26 @@ export function VoiceCallWidget({ agentId, className }: VoiceCallWidgetProps) {
           </>
         ) : (
           <>
-            <div className="w-3 h-3 rounded-full bg-muted" />
+            <div className="w-3 h-3 rounded-full bg-green-500 animate-pulse" />
             <span className="text-muted-foreground">Ready to call</span>
           </>
         )}
       </div>
+
+      {/* Audio visualization ring when connected */}
+      {isConnected && (
+        <div className="relative">
+          <div className={`absolute inset-0 rounded-full ${isSpeaking ? 'bg-green-500/20' : 'bg-blue-500/20'} animate-ping`} style={{ animationDuration: '1.5s' }} />
+          <div className={`absolute inset-0 rounded-full ${isSpeaking ? 'bg-green-500/10' : 'bg-blue-500/10'} animate-ping`} style={{ animationDuration: '2s', animationDelay: '0.5s' }} />
+          <div className={`w-24 h-24 rounded-full flex items-center justify-center ${isSpeaking ? 'bg-green-100' : 'bg-blue-100'}`}>
+            {isSpeaking ? (
+              <Volume2 className="h-10 w-10 text-green-600 animate-pulse" />
+            ) : (
+              <Mic className="h-10 w-10 text-blue-600 animate-pulse" />
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Call button */}
       {!isConnected ? (
@@ -135,7 +150,7 @@ export function VoiceCallWidget({ agentId, className }: VoiceCallWidgetProps) {
           onClick={startConversation}
           disabled={isConnecting || !agentId}
           size="lg"
-          className="gap-2 rounded-full px-8 py-6 text-lg bg-green-600 hover:bg-green-700"
+          className="gap-2 rounded-full px-8 py-6 text-lg bg-green-600 hover:bg-green-700 animate-pulse hover:animate-none"
         >
           {isConnecting ? (
             <>
@@ -163,9 +178,9 @@ export function VoiceCallWidget({ agentId, className }: VoiceCallWidgetProps) {
 
       {/* Microphone indicator when connected */}
       {isConnected && (
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Mic className="h-4 w-4" />
-          <span>Microphone active</span>
+        <div className="flex items-center gap-2 text-sm text-green-600 font-medium">
+          <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+          <span>Call in progress</span>
         </div>
       )}
 
